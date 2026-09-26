@@ -31,10 +31,11 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_ACCOUNT_ID: af8966f7e79e83ed3315b1de46bb7946
           CF_WORKER_NAME: amb-ui-auth
-          # GitHub-side secrets. Only GITHUB_APP_CLIENT_ID, GITHUB_APP_CLIENT_SECRET,
+          # GitHub-side secrets. Only GH_APP_CLIENT_ID, GH_APP_CLIENT_SECRET,
           # and APP_SLUG are required; ALLOWED_ORIGIN has a default in wrangler.jsonc.
-          SECRET_GITHUB_APP_CLIENT_ID:     ${{ secrets.GITHUB_APP_CLIENT_ID }}
-          SECRET_GITHUB_APP_CLIENT_SECRET: ${{ secrets.GITHUB_APP_CLIENT_SECRET }}
+          # Note: 'GITHUB_*' is reserved by GitHub Actions — we use 'GH_APP_*'.
+          SECRET_GITHUB_APP_CLIENT_ID:     ${{ secrets.GH_APP_CLIENT_ID }}
+          SECRET_GITHUB_APP_CLIENT_SECRET: ${{ secrets.GH_APP_CLIENT_SECRET }}
           SECRET_APP_SLUG:                 ${{ secrets.APP_SLUG }}
         run: |
           set -euo pipefail

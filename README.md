@@ -75,6 +75,30 @@ config — see the UI repo's README).
 | `/install`  | GET    | Redirects to the GitHub App install page                   |
 | `/healthz`  | GET    | Liveness check — returns `ok`                              |
 
+## GitHub App registration notes
+
+This worker is designed for a GitHub App (not an OAuth App). When you
+register the App:
+
+- **Homepage URL**: `https://nxn94.github.io/AutoMorpheBuilder-UI/` (or your fork)
+- **Callback URL**: GitHub Apps don't have a separate callback field — the
+  redirect URL is passed at runtime via the `redirect_uri` query parameter
+  on `/login/oauth/authorize`. The worker always uses
+  `${AUTH_BASE}/callback` as that URL, so no App registration step is needed.
+- **Setup URL** (optional, for Apps that can be installed): leave default or
+  point at the UI's home page
+- **Webhook**: leave **off** (we don't use it)
+- **Permissions**:
+  - Repository: **Contents** = Read & Write
+  - Repository: **Pull requests** = Read & Write
+  - Account: **Metadata** = Read-only (default)
+- **Where can this GitHub App be installed?**: **Any account** so any
+  user with a fork can sign in
+
+The App's `client_id` and `client_secret` are the values passed to
+`GITHUB_APP_CLIENT_ID` and `GITHUB_APP_CLIENT_SECRET` (or `GH_APP_*` on
+GitHub Actions, since `GITHUB_*` is a reserved prefix).
+
 ## Security notes
 
 - The `client_secret` lives only in Cloudflare's secret store, never in git, never in the browser.

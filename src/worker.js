@@ -59,10 +59,9 @@ export default {
         return errorPage('No authorization code in the redirect.');
       }
 
-      // The state (and code_verifier) was passed through to GitHub via the
-      // `state` parameter, which is echoed back unchanged. UI uses this to
-      // verify the callback belongs to the same flow. We forward it through
-      // to /done so the opener can verify it.
+      // Forward code + state to /done so the popup page can exchange the
+      // code for a token (using the verifier embedded in state) and post
+      // it back to the opener.
       const redirectTo = new URL('/done', url.origin);
       redirectTo.searchParams.set('code',  code);
       redirectTo.searchParams.set('state', state || '');
@@ -159,8 +158,9 @@ function escapeHtml(s) {
 
 // The popup landing page that exchanges the code and posts the token back.
 // We can't access localStorage/sessionStorage from this origin (different
-// origin from the UI Pages site). The opener sets the code_verifier on
-// window.name before opening the popup — so we read it from there.
+// origin from the UI Pages site). The opener encodes the PKCE verifier
+// in the `state` parameter (state = verifier.nonce), and GitHub echoes
+// state back through the redirect unchanged. We split it back here.
 const DONE_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Signing in…</title>
 <style>body{font:14px/1.5 system-ui,sans-serif;max-width:480px;margin:3rem auto;padding:1rem;color:#1f2328;background:#fafbfc;border:1px solid #d0d7de;border-radius:6px}h1{margin-top:0;font-size:1.2rem}p{color:#57606a}code{background:#eff1f3;padding:0.1em 0.3em;border-radius:3px;font-size:0.9em}</style>
 </head><body>
@@ -178,11 +178,12 @@ const DONE_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Signi
     var state  = params.get('state') || '';
     if (!code) { setStatus('Sign-in failed', 'No authorization code.'); return; }
 
-    // code_verifier was passed via window.name by the opener. window.name
-    // survives the cross-origin redirect because it's not subject to the
-    // same-origin policy on read.
-    var codeVerifier = '';
-    try { codeVerifier = window.name || ''; } catch (e) {}
+    // Split the state back into verifier and nonce. Format: "<verifier>.<nonce>".
+    // The dot is a safe separator since base64url doesn't include it.
+    var splitAt = state.lastIndexOf('.');
+    if (splitAt < 1) { setStatus('Sign-in failed', 'Malformed state parameter.'); return; }
+    var codeVerifier = state.slice(0, splitAt);
+    var nonce        = state.slice(splitAt + 1);
 
     var resp = await fetch('/token', {
       method: 'POST',
@@ -195,10 +196,12 @@ const DONE_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Signi
       return;
     }
 
-    // Post the token back to the opener window and close.
+    // Post the token back to the opener window and close. Send the nonce
+    // (not the full state) so the opener can match it against its pending
+    // flow without re-parsing the verifier.
     if (window.opener) {
       try {
-        window.opener.postMessage({ type: 'amb-ui-oauth', state: state, token: data.access_token, scope: data.scope }, '*');
+        window.opener.postMessage({ type: 'amb-ui-oauth', nonce: nonce, token: data.access_token, scope: data.scope }, '*');
       } catch (e) { /* opener may be gone */ }
     }
     setStatus('Signed in', 'You can close this window.');

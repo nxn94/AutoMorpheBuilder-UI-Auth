@@ -10,13 +10,23 @@
 #   - A Cloudflare account (free tier works)
 #   - The wrangler CLI installed (`npm install` in this directory)
 #
-# IMPORTANT — the GitHub App's callback URL must be set to:
-#   https://amb-ui-auth.<your-subdomain>.workers.dev/callback
-# where <your-subdomain> is what wrangler prints after `wrangler deploy`.
-# The App must have these permissions:
-#   - Contents: read & write
-#   - Pull requests: read & write
-#   - Metadata: read (default)
+# Prerequisites (one-time, in your Cloudflare account):
+#   1. Visit https://dash.cloudflare.com/<account-id>/workers/onboarding
+#      and set up a workers.dev subdomain. Pick any prefix (e.g. "nxn94").
+#      This is required before ANY worker can deploy.
+#   2. Create an API token at https://dash.cloudflare.com/profile/api-tokens
+#      with the "Edit Cloudflare Workers" template, scoped to your account.
+#   3. Add the token as a repository secret named CLOUDFLARE_API_TOKEN
+#      (Settings → Secrets and variables → Actions → New repository secret).
+#   4. Set the worker secrets via the Cloudflare dashboard or by running
+#      `wrangler secret put <NAME>` from a machine with wrangler CLI logged in.
+#      Required secrets:
+#        GITHUB_APP_CLIENT_ID
+#        GITHUB_APP_CLIENT_SECRET
+#        APP_SLUG
+#
+# The GitHub App registration must have a callback URL matching the deployed
+# worker's URL + /callback. See ../README.md for the full flow.
 
 set -euo pipefail
 

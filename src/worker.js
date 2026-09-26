@@ -117,18 +117,30 @@ export default {
 };
 
 async function exchangeCode(env, code, codeVerifier) {
-  const r = await fetch('https://github.com/login/oauth/access_token', {
+  // GitHub's /login/oauth/access_token endpoint is rate-limited per IP
+  // (~60 exchanges per hour from a single source). If we get 429, back off
+  // and retry once. Auth codes are one-shot — if the retry also fails,
+  // the user has to re-authorize anyway.
+  const url = 'https://github.com/login/oauth/access_token';
+  const body = JSON.stringify({
+    client_id:     env.GITHUB_APP_CLIENT_ID,
+    client_secret: env.GITHUB_APP_CLIENT_SECRET,
+    code,
+    code_verifier: codeVerifier,
+  });
+  const fetchOnce = () => fetch(url, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'accept': 'application/json' },
-    body: JSON.stringify({
-      client_id:     env.GITHUB_APP_CLIENT_ID,
-      client_secret: env.GITHUB_APP_CLIENT_SECRET,
-      code,
-      code_verifier: codeVerifier,
-    }),
+    body,
   });
-  const body = await r.json().catch(() => ({}));
-  return { status: r.status, body };
+  let r = await fetchOnce();
+  if (r.status === 429) {
+    // Retry once after 2s — usually enough for a brief rate-limit window.
+    await new Promise(res => setTimeout(res, 2000));
+    r = await fetchOnce();
+  }
+  const body2 = await r.json().catch(() => ({}));
+  return { status: r.status, body: body2 };
 }
 
 function corsHeaders(env) {

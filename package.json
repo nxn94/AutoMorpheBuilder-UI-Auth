@@ -1,0 +1,24 @@
+{
+  "name": "automorphebuilder-ui-auth",
+  "version": "1.0.0",
+  "description": "A tiny Cloudflare Worker that handles the GitHub App OAuth callback for [nxn94/AutoMorpheBuilder-UI](https://github.com/nxn94/AutoMorpheBuilder-UI).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nxn94/AutoMorpheBuilder-UI-Auth.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nxn94/AutoMorpheBuilder-UI-Auth/issues"
+  },
+  "homepage": "https://github.com/nxn94/AutoMorpheBuilder-UI-Auth#readme",
+  "dependencies": {
+    "wrangler": "^4.141.0"
+  }
+}

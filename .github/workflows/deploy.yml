@@ -19,6 +19,7 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: '.'
           # wrangler.jsonc is read for config; secrets stay in the Cloudflare dashboard.
           # To rotate secrets, use `wrangler secret put NAME` from a machine with
           # wrangler CLI logged in, or set them via the Cloudflare dashboard.

@@ -81,10 +81,17 @@ This worker is designed for a GitHub App (not an OAuth App). When you
 register the App:
 
 - **Homepage URL**: `https://nxn94.github.io/AutoMorpheBuilder-UI/` (or your fork)
-- **Callback URL**: GitHub Apps don't have a separate callback field — the
-  redirect URL is passed at runtime via the `redirect_uri` query parameter
-  on `/login/oauth/authorize`. The worker always uses
-  `${AUTH_BASE}/callback` as that URL, so no App registration step is needed.
+- **Callback URL**: REQUIRED. In the App's settings, find the section
+  "Identifying and authorizing users" (the name varies by GitHub App
+  config; on older setups it's just "Authorization callback URL"). Set
+  it to:
+  ```
+  https://amb-ui-auth.nxn94.workers.dev/callback
+  ```
+  GitHub will reject OAuth flows at the authorize endpoint if this URL
+  doesn't match the `redirect_uri` parameter the worker uses.
+- **Request user authorization (OAuth) during installation**: leave OFF.
+  We only request auth at runtime via `signIn()` in the UI.
 - **Setup URL** (optional, for Apps that can be installed): leave default or
   point at the UI's home page
 - **Webhook**: leave **off** (we don't use it)

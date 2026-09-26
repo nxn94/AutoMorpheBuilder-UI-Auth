@@ -24,3 +24,22 @@ jobs:
           # wrangler.jsonc is read for config; secrets stay in the Cloudflare dashboard.
           # To rotate secrets, use `wrangler secret put NAME` from a machine with
           # wrangler CLI logged in, or set them via the Cloudflare dashboard.
+
+      - name: Set worker secrets from GitHub Actions secrets
+        if: success()
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: af8966f7e79e83ed3315b1de46bb7946
+          CF_WORKER_NAME: amb-ui-auth
+          # GitHub-side secrets. Only GITHUB_APP_CLIENT_ID, GITHUB_APP_CLIENT_SECRET,
+          # and APP_SLUG are required; ALLOWED_ORIGIN has a default in wrangler.jsonc.
+          SECRET_GITHUB_APP_CLIENT_ID:     ${{ secrets.GITHUB_APP_CLIENT_ID }}
+          SECRET_GITHUB_APP_CLIENT_SECRET: ${{ secrets.GITHUB_APP_CLIENT_SECRET }}
+          SECRET_APP_SLUG:                 ${{ secrets.APP_SLUG }}
+        run: |
+          set -euo pipefail
+          echo "▸ Setting Cloudflare worker secrets..."
+          npx --yes wrangler@4 secret put GITHUB_APP_CLIENT_ID     --name "$CF_WORKER_NAME" <<< "$SECRET_GITHUB_APP_CLIENT_ID"
+          npx --yes wrangler@4 secret put GITHUB_APP_CLIENT_SECRET --name "$CF_WORKER_NAME" <<< "$SECRET_GITHUB_APP_CLIENT_SECRET"
+          npx --yes wrangler@4 secret put APP_SLUG                 --name "$CF_WORKER_NAME" <<< "$SECRET_APP_SLUG"
+          echo "▸ Secrets set. Worker will pick them up on the next request."

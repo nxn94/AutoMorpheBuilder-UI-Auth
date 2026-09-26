@@ -86,7 +86,7 @@ register the App:
   config; on older setups it's just "Authorization callback URL"). Set
   it to:
   ```
-  https://amb-ui-auth.nxn94.workers.dev/callback
+  https://nxn94.github.io/AutoMorpheBuilder-UI/auth-callback.html
   ```
   GitHub will reject OAuth flows at the authorize endpoint if this URL
   doesn't match the `redirect_uri` parameter the worker uses.

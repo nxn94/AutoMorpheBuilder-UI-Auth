@@ -1,0 +1,21 @@
+// Cloudflare Worker config for the AutoMorpheBuilder UI auth handler.
+// - name: subdomain under workers.dev (free tier)
+// - main: entrypoint
+// - compatibility_date: latest stable
+// - vars: non-secret config (public; safe to commit)
+// Secrets (GITHUB_APP_CLIENT_ID, GITHUB_APP_CLIENT_SECRET, ALLOWED_ORIGIN, APP_SLUG)
+// are set via `wrangler secret put <NAME>` and NOT stored in git.
+
+{
+  "name": "amb-ui-auth",
+  "main": "src/worker.js",
+  "compatibility_date": "2024-12-01",
+  "vars": {
+    // The Pages URL that hosts the UI. postMessage targets this origin.
+    // Update this to match the deployed Pages URL.
+    "ALLOWED_ORIGIN": "https://nxn94.github.io"
+    // APP_SLUG is set as a secret so we don't accidentally leak it in
+    // commits. Set it via `wrangler secret put APP_SLUG`.
+  },
+  "observability": { "enabled": true }
+}

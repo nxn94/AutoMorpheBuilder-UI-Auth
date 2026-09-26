@@ -3,6 +3,7 @@
   "name": "amb-ui-auth",
   "main": "src/worker.js",
   "compatibility_date": "2024-12-01",
+  "account_id": "af8966f7e79e83ed3315b1de46bb7946",
   "vars": {
     "ALLOWED_ORIGIN": "https://nxn94.github.io"
   }
